@@ -1,0 +1,17 @@
+influxdb3-python == 0.11.0
+ipython == 9.0.2
+langchain == 0.3.19
+langchain-chroma == 0.2.2
+langchain-community == 0.3.18
+langchain-ollama == 0.3.0
+langchainhub == 0.1.21
+langgraph == 0.3.20
+langgraph-checkpoint-sqlite == 2.0.6
+langgraph-cli[inmem] == 0.1.89
+pandas == 2.2.3
+pydantic == 2.10.6
+PyMuPDF == 1.25.3
+pypdf == 5.4.0
+python-dotenv == 1.1.0
+rank-bm25 == 0.2.2
+tavily-python == 0.5.4
