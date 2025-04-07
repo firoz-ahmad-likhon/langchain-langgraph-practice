@@ -5,6 +5,7 @@ import fitz  # type: ignore
 import re
 import unicodedata
 from IPython.display import Image
+from langchain_core.messages.base import BaseMessage
 
 
 class Helper:
@@ -80,3 +81,19 @@ class Helper:
             raise ValueError("Invalid file type. Use 'json', 'txt', or 'png'.")
 
         print("Saved content to ", {file})
+
+    @staticmethod
+    def accumulate_agent_messages(response: dict[str, list[BaseMessage]]) -> str:
+        """Accumulates and returns all message contents from the agent response.
+
+        :param response: The response from the LangGraph agent.
+        Returns: Concatenated message contents.
+        """
+        messages = response.get("messages", [])
+        collected_output = []
+
+        for msg in messages:
+            if hasattr(msg, "content") and msg.content:
+                collected_output.append(str(msg.content))
+
+        return "\n".join(collected_output)
