@@ -7,6 +7,7 @@ class Classification(BaseModel):
 
     sentiment: Literal["happy", "neutral", "sad"]
     aggressiveness: Literal[1, 2, 3, 4, 5] = Field(
-        ..., description="Describes how aggressive the statement is; the higher the number, the more aggressive.",
+        ...,
+        description="Describes how aggressive the statement is; the higher the number, the more aggressive.",
     )
     language: Literal["spanish", "english", "french", "german", "italian"]

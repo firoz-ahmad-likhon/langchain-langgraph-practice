@@ -20,8 +20,7 @@ class Helper:
         text = re.sub(r"[^\w\s@,./#!?;:\"'()\-+]", " ", text)
 
         # Remove artifacts like "envel⌢pe" and "♂phone"
-        text = re.sub(
-            r"\b\w*[\u2000-\u206F\u2E00-\u2E7F\u25A0-\u25FF]+\w*\b", "", text)
+        text = re.sub(r"\b\w*[\u2000-\u206F\u2E00-\u2E7F\u25A0-\u25FF]+\w*\b", "", text)
 
         # Normalize spaces and line breaks
         # text = re.sub(r"\s+", " ", text).strip()
@@ -44,22 +43,26 @@ class Helper:
         return content
 
     @staticmethod
-    def save_content(file_path: Path, file_name: str, text: Any, file_type: str = "json") -> None:
+    def save_content(
+        file_path: Path,
+        file_name: str,
+        text: Any,
+        file_type: str = "json",
+    ) -> bool:
         """Save content to a file.
 
         :param file_path: Directory path to save the file.
         :param file_name: Name of the file.
         :param text: Content of the file.
         :param file_type: Type [json, txt] of the file to save.
-        :return: None or Exception if file type is invalid.
+        :return: True if successful, False or Exception if file type is invalid.
         """
         file_path.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         file = file_path / f"{file_name}.{file_type}"  # Construct file path
 
         if file_type == "json":
             with open(file, "w", encoding="utf-8") as json_file:
-                json.dump(text, json_file, ensure_ascii=False,
-                          indent=4)  # Save as JSON
+                json.dump(text, json_file, ensure_ascii=False, indent=4)  # Save as JSON
         elif file_type == "txt":
             with open(file, "w", encoding="utf-8") as txt_file:
                 txt_file.write(str(text))  # Save as plain text
@@ -72,7 +75,8 @@ class Helper:
                 img_data = text
             else:
                 raise ValueError(
-                    "Invalid image content. Must be bytes or IPython.display.Image.")
+                    "Invalid image content. Must be bytes or IPython.display.Image.",
+                )
 
             with open(file, "wb") as img_file:
                 img_file.write(img_data)
@@ -80,7 +84,7 @@ class Helper:
         else:
             raise ValueError("Invalid file type. Use 'json', 'txt', or 'png'.")
 
-        print("Saved content to ", {file})
+        return True
 
     @staticmethod
     def accumulate_agent_messages(response: dict[str, list[BaseMessage]]) -> str:

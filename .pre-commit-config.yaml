@@ -22,20 +22,20 @@ repos:
 
     # Ruff
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.3
+    rev: v0.11.4
     hooks:
     -   id: ruff
         args: ["--config", "./.ruff.toml"]
 
     # Mypy
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.13.0'
+    rev: 'v1.15.0'
     hooks:
     -   id: mypy
         args: ["--config-file", "./.mypy.ini"]
 
-    # Autopep8
--   repo: https://github.com/hhatto/autopep8
-    rev: v2.3.1
+    # Black
+-   repo: https://github.com/psf/black
+    rev: 25.1.0
     hooks:
-    -    id: autopep8
+    -   id: black

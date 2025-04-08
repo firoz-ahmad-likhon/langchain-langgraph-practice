@@ -10,10 +10,15 @@ from langgraph.graph.state import CompiledStateGraph
 
 def assistant(state: MessagesState, llm_model: ChatOllama) -> dict[str, Any]:
     """Process message with LLM."""
-    prompt_template = ChatPromptTemplate([
-        ("system", "You are a smart chatbot. Answer all questions to the best of your ability."),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
+    prompt_template = ChatPromptTemplate(
+        [
+            (
+                "system",
+                "You are a smart chatbot. Answer all questions to the best of your ability.",
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ],
+    )
     prompt = prompt_template.with_config(run_name="Prompt").invoke(state)
     return {"messages": llm_model.with_config(run_name="Chatting").invoke(prompt)}
 
@@ -29,7 +34,7 @@ def dag(llm_model: ChatOllama) -> CompiledStateGraph:
 
 
 try:
-    llm = ChatOllama(model="llama3.2", temperature=.1)
+    llm = ChatOllama(model="llama3.2", temperature=0.1)
     chatbot = dag(llm)
 except Exception as e:
     raise RuntimeError(f"Ollama API error: {e}") from e
