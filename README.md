@@ -7,6 +7,7 @@ A langchain and langgraph practice project.
 - OLLAMA installed
 
 ## DEVELOPMENT
+***Langchain***
 1. Clone the repository.
 2. Create a virtual environment `python -m venv .venv`.
 3. Activate the virtual environment `source .venv/bin/activate`. In Windows, use `.venv\Scripts\activate` instead.
@@ -16,6 +17,10 @@ A langchain and langgraph practice project.
 7. Create `mkdir resource/cv` directory and copy `cp resource/software-engineer-resume-example.pdf resource/cv` into it.
    In Windows, use `copy resource/software-engineer-resume-example.pdf resource/cv` instead.
 8. Run the code `python file_name.py`.
+
+***Langgraph***
+1. Go to the langgraph directory `cd langgraph`.
+2. Start the langgraph studio `langgraph dev`.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
