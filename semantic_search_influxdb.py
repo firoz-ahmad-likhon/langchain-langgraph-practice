@@ -7,7 +7,6 @@ Here RunnableLambda is used to chain the functions and make it easy to read.
 """
 
 from typing import Any
-
 from influxdb_client_3 import InfluxDBClient3
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
@@ -21,42 +20,67 @@ from dotenv import load_dotenv
 load_dotenv()  # loading .env
 
 
-def extract(client: InfluxDBClient3) -> pd.DataFrame:
+class DataState:
+    """Class to hold the state of data processing to avoid tracking DataFrame evaluation issues."""
+
+    def __init__(self, client: InfluxDBClient3, df: pd.DataFrame = None) -> None:
+        """Initialize the state."""
+        self.client = client
+        self._df = df
+
+    @property
+    def df(self) -> pd.DataFrame:
+        """Getters for the dataframe."""
+        if self._df is None:
+            raise ValueError("DataFrame is not set yet.")
+        return self._df
+
+    @df.setter
+    def df(self, value: pd.DataFrame) -> None:
+        """Setters for the dataframe."""
+        self._df = value
+
+    def __bool__(self) -> bool:
+        """Override bool evaluation to avoid DataFrame truth value ambiguity."""
+        return True
+
+
+def extract(state: DataState) -> DataState:
     """Read data from InfluxDB."""
     query = "select * from attendance"
-
     try:
-        reader = client.query(query=query, language="sql")  # Execute the query
-        return reader.to_pandas()  # Convert the result to a pandas DataFrame
+        reader = state.client.query(query=query, language="sql")  # Execute the query
+        state.df = reader.to_pandas()  # Convert the result to a pandas DataFrame
+        return state
     except Exception as e:
         raise Exception("An error occurred: ", e) from e
 
 
-def transform(df: pd.DataFrame, embedding_model: OllamaEmbeddings) -> pd.DataFrame:
+def transform(state: DataState, embedding_model: OllamaEmbeddings) -> DataState:
     """Transform the data."""
     try:
         # Generate unique IDs for each document
-        df["unique_id"] = df.apply(
+        state.df["unique_id"] = state.df.apply(
             lambda row: f"{row['time']}_{row['name']}_{row['present']}",
             axis=1,
         )
 
         # Generate structured page content
-        df["page_content"] = df.apply(
+        state.df["page_content"] = state.df.apply(
             lambda row: f"At {row['time']},  {row['name']} was {'present' if row['present'] else 'absent'}.",
             axis=1,
         )
 
         # Generate embeddings
-        df["vector"] = embedding_model.embed_documents(df["page_content"].tolist())
-
-        return df
-
+        state.df["vector"] = embedding_model.embed_documents(
+            state.df["page_content"].tolist(),
+        )
+        return state
     except Exception as e:
         raise Exception(f"Error during processing: {e}") from e
 
 
-def load(df: pd.DataFrame, vector_store: Chroma) -> int:
+def load(state: DataState, vector_store: Chroma) -> int:
     """Store the data in ChromaDB."""
     try:
         # Create Document objects for each row
@@ -69,17 +93,16 @@ def load(df: pd.DataFrame, vector_store: Chroma) -> int:
                         if isinstance(row[col], pd.Timestamp)
                         else row[col]
                     )
-                    for col in df.columns
+                    for col in state.df.columns
                     if col not in ["page_content", "vector", "unique_id"]
                 },
                 id=row["unique_id"],
             )
-            for _, row in df.iterrows()
+            for _, row in state.df.iterrows()
         ]
 
         vector_store.add_documents(documents)
-        return len(df)
-
+        return len(state.df)
     except Exception as e:
         raise Exception(
             f"Error occurred while storing embeddings in ChromaDB: {str(e)}",
@@ -102,6 +125,7 @@ def query_test(vector_store: Chroma) -> dict[str, Any]:
     }
 
 
+@traceable(name="InfluxDB to ChromaDB")
 def run() -> str:
     """Process all."""
     # Initialize the client
@@ -111,6 +135,7 @@ def run() -> str:
         org=os.getenv("INFLUXDB_ORG"),
         database=os.getenv("INFLUXDB_DB"),
     )
+
     # Initialize Ollama embeddings model
     embedding_model = OllamaEmbeddings(
         model="nomic-embed-text",
@@ -126,18 +151,23 @@ def run() -> str:
 
     # Workflow
     chain = (
-        RunnableLambda(lambda influx_client: extract(influx_client), name="Extract")
+        RunnableLambda(lambda state: extract(state), name="Extract")
         | RunnableLambda(
-            lambda data: transform(data, embedding_model),
+            lambda state: transform(state, embedding_model),
             name="Transform",
         )
-        | RunnableLambda(lambda data: load(data, vector_store), name="Load")
-        | RunnableLambda(lambda _: query_test(vector_store), name="Query")
+        | RunnableLambda(lambda state: load(state, vector_store), name="Load")
     )
 
-    chain.name = "InfluxDB to ChromaDB"
-    chain.invoke(client)
-    # RunnableSequence(chain, name="InfluxDB to ChromaDB").invoke(None)
+    chain.name = "ETL"
+    chain.invoke(DataState(client=client))
+    # RunnableSequence(chain, name="InfluxDB to ChromaDB").invoke(DataState(client=client))
+
+    # Query test
+    testing = RunnableLambda(lambda _: query_test(vector_store), name="Query Test")
+    testing.name = "testing"
+    testing.invoke(None)
+
     return "Done!"
 
 
