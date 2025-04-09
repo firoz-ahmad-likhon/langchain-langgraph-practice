@@ -1,7 +1,8 @@
 {
   "dependencies": ["../"],
   "graphs": {
-    "agent": "./src/agent/chatbot.py:chatbot"
+    "chatbot": "./src/agent/chatbot.py:chatbot",
+    "mood_switcher": "./src/agent/mood_switcher.py:mood_switcher"
   },
   "env": "../.env"
 }
