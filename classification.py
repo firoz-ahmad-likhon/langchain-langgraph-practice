@@ -43,7 +43,7 @@ def run() -> str:
     try:
         # Initialize Ollama
         llm = ChatOllama(
-            model="llama3.2",  # gemma:7b deepseek-r1:8b llama3.2 gemma3:4b
+            model="llama3.2",
             temperature=0.1,
         )
         data = classify(
