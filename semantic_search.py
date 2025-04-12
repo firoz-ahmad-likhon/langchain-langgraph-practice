@@ -4,7 +4,7 @@ Here @chain decorator is used to chain the functions and make it easy to read.
 """
 
 from typing import cast, Any
-from langchain_community.document_loaders import PyPDFLoader
+from helper.helper import Helper
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
@@ -20,16 +20,10 @@ from dotenv import load_dotenv
 load_dotenv()  # loading .env
 
 
-def parse_pdf(pdf_path: PurePath) -> list[Document]:
-    """Parse the PDF data."""
-    loader = PyPDFLoader(pdf_path)
-    return cast(list[Document], loader.load())
-
-
 @chain
 def extract(pdf_path: PurePath) -> list[Document]:
     """Convert PDF to documents."""
-    return parse_pdf(pdf_path)
+    return Helper.parse_pdf(pdf_path)
 
 
 @chain
@@ -166,7 +160,7 @@ def run() -> str:
     # Ensemble Retriever
     ensemble_retriever.bind(
         vector_store=vector_store,
-        docs=parse_pdf(PurePath("./resource/Bangladesh Overview.pdf")),
+        docs=Helper.parse_pdf(PurePath("./resource/Bangladesh Overview.pdf")),
     ).batch(
         [
             "When did Bangladesh get independence?",

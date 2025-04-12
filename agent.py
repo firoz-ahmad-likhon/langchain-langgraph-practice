@@ -1,7 +1,7 @@
 """A calculator agent."""
 
 from typing import Any
-from pydantic import BaseModel, Field
+from model.calculator import CalculatorInput
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
@@ -11,13 +11,6 @@ from helper.helper import Helper
 from dotenv import load_dotenv
 
 load_dotenv()  # loading .env
-
-
-class CalculatorInput(BaseModel):
-    """Input for multiplication tool."""
-
-    a: int = Field(description="first number")
-    b: int = Field(description="second number")
 
 
 @tool(
