@@ -18,25 +18,16 @@ class ConfigSchema(TypedDict):
 
     model: str | None
 
-
-class OllamaSingleton:
-    """Singleton class to manage the Ollama model instance."""
-
-    _instance: ChatOllama | None = None
-
-    @classmethod
-    def get_instance(cls, model_name: str = "llama3.2") -> ChatOllama:
-        """Get the single instance of the ChatOllama model."""
-        if cls._instance is None or cls._instance.model != model_name:
-            cls._instance = ChatOllama(model=model_name, temperature=0.1)
-        return cls._instance
-
+# Available models
+models = {
+    "ollama": ChatOllama(model="llama3.2", temperature=0.1)
+}
 
 def assistant(state: MessagesState, config: RunnableConfig) -> dict[str, Any]:
     """Process message with LLM."""
-    llm_model = OllamaSingleton.get_instance(
-        config.get("configurable", {}).get("model") or "llama3.2",
-    )
+    # Select model
+    model_name = config.get("configurable", {}).get("model", "ollama")
+    llm_model = models.get(model_name, models["ollama"])
 
     # Check if the user wants to quit
     last_user_msg = state["messages"][-1].content.strip().lower()
@@ -61,7 +52,6 @@ def dag() -> CompiledStateGraph:
     workflow.add_node("assistant", assistant)
     workflow.add_edge(START, "assistant")
 
-    # Use LangGraph's built-in persistence
     return workflow.compile(name="Chatbot")
 
 

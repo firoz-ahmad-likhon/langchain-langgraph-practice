@@ -2,7 +2,7 @@
 
 from typing import Any, cast
 from langchain_core.messages import BaseMessage
-from pydantic import BaseModel, Field
+from model.calculator import CalculatorInput
 from langchain_core.tools import BaseTool, tool
 from langchain_core.runnables import chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -10,13 +10,6 @@ from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 
 load_dotenv()  # loading .env
-
-
-class CalculatorInput(BaseModel):
-    """Input for multiplication tool."""
-
-    a: int = Field(description="first number")
-    b: int = Field(description="second number")
 
 
 @tool(
@@ -64,7 +57,7 @@ def get_tool_call(llm_model: ChatOllama, tools: list[BaseTool]) -> list[dict[Any
 
     return cast(
         list[dict[Any, Any]],
-        llm_model.bind_tools(tools, tool_choice="any").invoke(prompt).tool_calls,
+        llm_model.bind_tools(tools).invoke(prompt).tool_calls,
     )
 
 
@@ -105,7 +98,7 @@ def run() -> Any:
     try:
         # Initialize Ollama
         llm = ChatOllama(
-            model="llama3.2",  # gemma:7b deepseek-r1:8b llama3.2 gemma3:4b
+            model="llama3.2",
             temperature=0.1,
         )
         chain = (

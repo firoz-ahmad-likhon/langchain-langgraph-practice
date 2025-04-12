@@ -1,11 +1,13 @@
-from pathlib import Path
-from typing import Any
+from pathlib import Path, PurePath
+from typing import Any, cast
 import json
 import fitz  # type: ignore
 import re
 import unicodedata
 from IPython.display import Image
 from langchain_core.messages.base import BaseMessage
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.documents import Document
 
 
 class Helper:
@@ -85,6 +87,12 @@ class Helper:
             raise ValueError("Invalid file type. Use 'json', 'txt', or 'png'.")
 
         return True
+
+    @staticmethod
+    def parse_pdf(pdf_path: PurePath) -> list[Document]:
+        """Parse the PDF data."""
+        loader = PyPDFLoader(pdf_path)
+        return cast(list[Document], loader.load())
 
     @staticmethod
     def accumulate_agent_messages(response: dict[str, list[BaseMessage]]) -> str:
