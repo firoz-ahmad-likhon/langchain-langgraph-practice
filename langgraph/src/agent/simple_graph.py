@@ -43,16 +43,15 @@ def dag() -> CompiledStateGraph:
     workflow.add_node("mood", mood)
     workflow.add_node("happy", happy)
     workflow.add_node("sad", sad)
-
     workflow.add_edge(START, "mood")
     workflow.add_conditional_edges("mood", decide_mood)
     workflow.add_edge("happy", END)
     workflow.add_edge("sad", END)
 
-    return workflow.compile(name="Mood Switcher")
+    return workflow.compile(name="Simple Graph")
 
 
 try:
-    mood_switcher = dag()
+    simple_graph = dag()
 except Exception as e:
     raise Exception(f"Error: {e}") from e

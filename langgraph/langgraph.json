@@ -1,9 +1,9 @@
 {
   "dependencies": ["../"],
   "graphs": {
-    "chatbot": "./src/agent/chatbot.py:chatbot",
-    "mood_switcher": "./src/agent/mood_switcher.py:mood_switcher",
-    "influxdb_rag": "./src/agent/influxdb_rag.py:influxdb_rag"
+    "simple_graph": "./src/agent/simple_graph.py:simple_graph",
+    "router": "./src/agent/router.py:router",
+    "chatbot": "./src/agent/chatbot.py:chatbot"
   },
   "env": "../.env"
 }

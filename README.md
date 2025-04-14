@@ -6,6 +6,10 @@ A langchain and langgraph practice project.
 - pip installed
 - OLLAMA installed
 
+## Models
+- llama3.2
+- llama3-groq-tool-use
+
 ## DEVELOPMENT
 ***Langchain***
 1. Clone the repository.
